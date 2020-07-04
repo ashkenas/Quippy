@@ -1,0 +1,12 @@
+{
+    "name": "quippy",
+    "description": "Discord bot that allows the playing of Quippy in a server.",
+    "version": "1.0.0",
+    "main": "bot.js",
+    "scripts": {
+      "start": "node bot.js"
+    },
+    "dependencies": {
+      "discord.js": "12.2.0"
+    }
+  }

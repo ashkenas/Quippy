@@ -1,0 +1,65 @@
+{
+    "prefix": "q.",
+    "categoryPrefix": "🎮q-",
+    "defaultPack": "",
+    "minPlayers": 3,
+    "maxPlayers": 8,
+    "gameSequence": {
+        "rounds": [
+            {
+                "prompts": 2,
+                "duration": 60,
+                "multiplier": 1
+            },
+            {
+                "prompts": 2,
+                "duration": 60,
+                "multiplier": 2
+            },
+            {
+                "prompts": 1,
+                "duration": 45,
+                "multiplier": 500
+            }
+        ],
+        "playerVotes": 3,
+        "spectatorVotes": 1,
+        "roundDelay": 5,
+        "votingDuration": 20,
+        "votingInterim": 5,
+        "disbandDelay": 30
+    },
+    "reactions": {
+        "joinPlayer": "🎉",
+        "joinSpectator": "👀",
+        "vote1": "1️⃣",
+        "vote2": "2️⃣"
+    },
+    "colors": {
+        "invite": 10902479,
+        "rules": 16751158,
+        "playerList": 6085370,
+        "scoreboard": 5525970,
+        "vote": 11751890,
+        "promptDelay": 16407707,
+        "prompt": 3754982,
+        "promptsSuccess": 53380,
+        "promptsFailed": 16721446
+    },
+    "progressBar": {
+        "rightCap": {
+            "full": "<:PBREF:728363946771349574>", 
+            "empty": "<:PBREE:728363946813292554>"
+        },
+        "middle": {
+            "full": "<:PBMF:728357853760454676>",
+            "middle": "<:PBMH:728357853798072342>",
+            "empty": "<:PBME:728357853709992077>"
+        },
+        "leftCap": {
+            "full": "<:PBLEF:728364652039372850>", 
+            "empty": "<:PBLEE:728364652119195748>"
+        }
+    },
+    "noResponsePlaceholder": "❌Didn't respond."
+}
