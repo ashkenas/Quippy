@@ -25,7 +25,7 @@ const voteFilter = (reaction, user) => emojiFilterBase(reaction, user, [config.r
 
 /**
  * Pause an async function.
- * @param {Number} ms Milliseconds to wait for.
+ * @param {number} ms - Milliseconds to wait for.
  */
 async function wait(ms) {return new Promise(resolve => setTimeout(resolve, ms));}
 Array.prototype.shuffle = function() { // Modified Fisher–Yates shuffle
@@ -83,7 +83,7 @@ class Game {
         this.invite = await inviteChannel.send({
             embed: {
                 title: "New Quippy Game",
-                description: `The rules are simple:\n**1**. Each player will be sent prompts to respond to.\n**2**. The players and spectators will then vote on which response they like best.\n**3**. Points are awarded based on percentage of votes earned, with bonuses.\nGame channel: <#${this.channel.id}>`,
+                description: `React with ${config.reactions.joinPlayer} to join as a player.\nReact with ${config.reactions.joinSpectator} to join as a spectator.\nSpectators can vote but can't answer prompts.\nGame channel: <#${this.channel.id}>`,
                 author: {
                     name: this.host.username,
                     icon_url: this.host.displayAvatarURL()
@@ -157,7 +157,7 @@ class Game {
         this.players.sort((a, b) => a.score < b.score ? 1 : -1);
         let scoreMsg = "";
         for(let i = 0; i < this.players.length; i++)
-            scoreMsg += `**${i+1}. ${this.players[i].user.username}**: ${this.players[i].score}\n`;
+            scoreMsg += `**${i+1}. ${this.players[i].player.displayName}**: ${this.players[i].score}\n`;
 
         this.channel.send({
             embed: {
@@ -245,9 +245,9 @@ class Game {
                         await this.channel.send({embed:
                             {
                                 title: "Prompt Winner",
-                                description: `**${this.players[j].user.username}**: ${this.players[j].score}\n**${player2.user.username}**: ${player2.score}`,
+                                description: `**${this.players[j].player.displayName}**: ${this.players[j].score}\n**${player2.player.displayName}**: ${player2.score}`,
                                 author: {
-                                    name: winner.user.username,
+                                    name: winner.player.displayName,
                                     icon_url: winner.user.displayAvatarURL()
                                 },
                                 color: config.colors.playerList
@@ -290,9 +290,9 @@ class Game {
                         score2 = Math.floor(vote2 / (vote1 + vote2) * 1000) * round.multiplier;
                     }
 
-                    promptInfo.fields[0].name += ` ${this.players[j].user.username}`;
+                    promptInfo.fields[0].name += ` ${this.players[j].player.displayName}`;
                     promptInfo.fields[0].value += `\n**__Score__**\n${vote1 + vote2 > 0 ? Math.floor(vote1 / (vote1 + vote2) * 100) : 0}%, ${score1} points`;
-                    promptInfo.fields[1].name += ` ${player2.user.username}`;
+                    promptInfo.fields[1].name += ` ${player2.player.displayName}`;
                     promptInfo.fields[1].value += `\n**__Score__**\n${vote1 + vote2 > 0 ? Math.floor(vote2 / (vote1 + vote2) * 100) : 0}%, ${score2} points`;
                     promptMsg.edit({embed: promptInfo});
                     
@@ -306,12 +306,12 @@ class Game {
                     const winner = score1 === score2 ? undefined : (score1 > score2 ? this.players[j] : player2);
                     const winnerEmbed = {
                         title: winner ? `Prompt Winner (+${100 * round.multiplier} bonus points)` : "Tie",
-                        description: `**${this.players[j].user.username}**: ${this.players[j].score}\n**${player2.user.username}**: ${player2.score}`,
+                        description: `**${this.players[j].player.displayName}**: ${this.players[j].score}\n**${player2.player.displayName}**: ${player2.score}`,
                         color: config.colors.playerList
                     }
                     if(winner) {
                         winnerEmbed.author = {
-                            name: winner.user.username,
+                            name: winner.player.displayName,
                             icon_url: winner.user.displayAvatarURL()
                         }
                     }
@@ -385,7 +385,7 @@ class Game {
                     voteCollector.stop();
                     
                     for(let j = 0; j < this.players.length; j++)
-                        promptInfo.fields[j].name += ` ${this.players[j].user.username}`;
+                        promptInfo.fields[j].name += ` ${this.players[j].player.displayName}`;
                     await promptMsg.edit({embed: promptInfo});
                     // Scoring
                     const orderedVotes = [];
@@ -414,7 +414,7 @@ class Game {
         await this.channel.send({
             embed: {
                 title: "Winner",
-                description: `${this.players[0].user.username}: ${this.players[0].score} points`,
+                description: `${this.players[0].player.displayName}: ${this.players[0].score} points`,
                 color: config.colors.promptsSuccess
             }
         });
@@ -429,7 +429,7 @@ class Game {
      */
     async handleCommand(msg) {
         if(msg.author != this.host) {
-            if(msg.content === "quit" && !this.running) {
+            if(msg.content.toLowerCase() === "quit" && !this.running) {
                 const quitter = this.waiting.find((player) => player === msg.author);
                 if(quitter) {
                     this.waiting.splice(this.waiting.indexOf(quitter), 1);
@@ -438,7 +438,7 @@ class Game {
                 this.channel.permissionOverwrites.get(msg.author.id).delete();
             }
         } else {
-            if(msg.content === "start" && !this.running) {
+            if(msg.content.toLowerCase() === "start" && !this.running) {
                 if(this.waiting.length < config.minPlayers) {
                     this.channel.send(`You need at least ${config.minPlayers} players to start!`).then((msg) => msg.delete({timeout: 3000}));
                 } else {
@@ -450,7 +450,7 @@ class Game {
                     this.channel.updateOverwrite(msg.guild.roles.everyone, {SEND_MESSAGES: false});
                     this.game();
                 }
-            } else if(msg.content === "end") {
+            } else if(msg.content.toLowerCase() === "end") {
                 this.endGame();
             }
         }
@@ -495,7 +495,8 @@ class GamePlayer {
 
     /** Create the channel this player will submit responses to. */
     async init() {
-        this.playerChannel = await this.gameChannel.guild.channels.create(`player-${this.user.username}`, {
+        this.player = this.gameChannel.guild.members.cache.get(this.user.id) || await this.gameChannel.guild.members.fetch(this.user.id);
+        this.playerChannel = await this.gameChannel.guild.channels.create(`player-${this.player.displayName}`, {
             parent: this.gameChannel.parent,
             permissionOverwrites: [
                 {

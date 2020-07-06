@@ -106,3 +106,4 @@ dist
 # Project Files
 .vscode/
 prompts/
+.env

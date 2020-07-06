@@ -48,17 +48,17 @@
     },
     "progressBar": {
         "rightCap": {
-            "full": "<:PBREF:728363946771349574>", 
-            "empty": "<:PBREE:728363946813292554>"
+            "full": "<:PBREF:729504827700150281>", 
+            "empty": "<:PBREE:729504827641692232>"
         },
         "middle": {
-            "full": "<:PBMF:728357853760454676>",
-            "middle": "<:PBMH:728357853798072342>",
-            "empty": "<:PBME:728357853709992077>"
+            "full": "<:PBMF:729504827540766831>",
+            "middle": "<:PBMH:729504827754676336>",
+            "empty": "<:PBME:729504827779842078>"
         },
         "leftCap": {
-            "full": "<:PBLEF:728364652039372850>", 
-            "empty": "<:PBLEE:728364652119195748>"
+            "full": "<:PBLEF:729504827385839663>", 
+            "empty": "<:PBLEE:729504827633172562>"
         }
     },
     "noResponsePlaceholder": "❌Didn't respond."
