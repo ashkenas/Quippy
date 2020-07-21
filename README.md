@@ -16,14 +16,14 @@ Name|Alias(es)|Arguments*|Description
 ----|---------|-------|-----------
 Help|h|[command name]|Lists all commands, or provides additional information about one when optionally specified.
 Statistics|stats||Lists stats about the bot.
-Packs||[pack name]|Lists all loaded packs, or provides additional information about one when optionally specified.
+Packs||[pack name]|Lists all loaded packs, or provides additional information about one when optionally specified. This command also accepts custom packs as attachments.
 Rules|||DMs the triggering user instructions on how to play the game.
-Create|c|[pack name]|Creates a new instance of the game. If no pack is specified, the default (set in the config) will be used.
+Create|c|[pack name]|Creates a new instance of the game. If no pack is specified, the default (set in the config) will be used. This command also accepts custom packs as attachments.
 Clean|||Deletes any channels the bot created that are no longer linked to a game (these usually result from a mid-game crash).
 
 \*Arguments surrounded in brackets (`[]`) are optional.
 # Providing Prompts
-Prompts are supplied as a `JSON` file referred to as a "pack".  Packs can be made available to the bot by placing them in a folder named `prompts`, located at the project root. Packs use the following structure:
+Prompts are supplied as a `JSON` file referred to as a "pack".  Packs can be made available to the bot by placing them in a folder named `prompts`, located at the project root. Packs can also be provided by the user on a per-game basis by attaching them to the create command. Packs use the following structure:
 ```json
 {
     "name": "",
@@ -37,6 +37,6 @@ name|string|A single, user-typeable word.  This will be used for pack selection.
 description|string|A brief description of the pack. Limited to 2048 characters. Supports Discord markdown.
 prompts|string[]|Each prompt in the pack, provided as separate string elements. Supports Discord markdown. Default blanks can be inserted using `<BLANK>`.
 
-When creating your own prompts, keep [these tips](https://www.jackboxgames.com/the-science-of-creating-a-quiplash-prompt/) in mind.
+When creating your own prompts, keep [these tips](https://www.jackboxgames.com/the-science-of-creating-a-quiplash-prompt/) in mind. A graphical pack editor can be found [here](https://quippybot.ml/).
 # Help
 Please open an issue if you've found any bugs or have suggestions for the bot.

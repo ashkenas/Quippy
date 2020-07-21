@@ -14,21 +14,41 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+const fetch = require('node-fetch');
 const Game = require('../game.js');
 const { defaultPack } = require('../config.json');
 
 module.exports = {
     name: "create",
     aliases: ["c"],
-    description: "Create a new game.",
+    description: "Create a new game. Attach a custom pack to use it.",
     syntax: "[optional:pack]",
     guildOnly: true,
     botPerms: 268725328,
     execute(msg, args) {
-        let pack = defaultPack;
-        if(args.length && args[0] !== "default" && msg.client.packs.has(args[0]))
-            pack = args[0];
-            
-        new Game(msg.channel, msg.author, pack, msg.client.game++);
+        if(args.length && args[0] !== "default" && msg.client.packs.has(args[0])) {
+            new Game(msg.channel, msg.author, this.client.packs.get(args[0]), msg.client.game++);
+        } else if(msg.attachments.size && msg.attachments.first().url.endsWith(".json")) {
+            fetch(msg.attachments.first().url).then((res) => res.json()).then((json) => {
+                const errors = [];
+                if(!json.name) {
+                    errors.push("That pack is missing a name!");
+                }
+                if(!json.description) {
+                    errors.push("That pack is missing a description!");
+                }
+                if(!json.prompts || !json.prompts.length) {
+                    errors.push("That pack is missing prompts!");
+                }
+
+                if(!errors.length) {
+                    new Game(msg.channel, msg.author, json, msg.client.game++);
+                } else {
+                    msg.channel.send(errors.join("\n"));
+                }
+            });
+        } else {
+            new Game(msg.channel, msg.author, this.client.packs.get(defaultPack), msg.client.game++);
+        }
     }
 }

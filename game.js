@@ -97,6 +97,11 @@ class Game {
 
         this.invitationWatcher = this.invite.createReactionCollector(inviteFilter);
         this.invitationWatcher.on('collect', (reaction, user) => {
+            if(!this.playerList) {
+                inviteChannel.send(`<@${user.id}>, the game is still setting up, please wait a second and try again.`).then((msg) => msg.delete({timeout: 3000}));
+                reaction.users.remove(user);
+                return;
+            }
             this.channel.createOverwrite(user, {VIEW_CHANNEL: true}).then(() => {
                 if(reaction.emoji.name == config.reactions.joinPlayer && !this.running && this.waiting.length < config.maxPlayers && !this.waiting.find((player) => player == user)) {
                     this.waiting.push(user);
@@ -105,7 +110,8 @@ class Game {
             }).catch((e) => {
                 console.error("[Error] Error occured while adding player.")
                 console.error(e);
-                inviteChannel.send(`<@${user.id}>, an error occured while adding you to the game, please try joining again.`);
+                inviteChannel.send(`<@${user.id}>, an error occured while adding you to the game, please try joining again.`).then((msg) => msg.delete({timeout: 3000}));
+                reaction.users.remove(user);
             });
         });
         
@@ -122,7 +128,17 @@ class Game {
                 description: `Vote on prompts by reacting with the emoji that corresponds to the response you like best.\nFor prompts that all players share:\n • __Players__ have **${config.gameSequence.playerVotes}** vote${(config.gameSequence.playerVotes > 1 ? "s" : "")} and can vote multiple times for the same answer.\n • __Spectators__ have **${config.gameSequence.spectatorVotes}** vote${(config.gameSequence.spectatorVotes > 1 ? "s" : "")}.\nYou can't ever vote for yourself.`,
                 color: config.colors.vote
             }
-        })
+        });
+        await this.channel.send({
+            embed: {
+                title: `Prompt Pack: ${this.pack.name}`,
+                description: this.pack.description,
+                color: config.colors.rules,
+                footer: {
+                    text: `${this.pack.prompts.length} prompts`
+                }
+            }
+        });
         
         await this.channel.send(`<@${this.host.id}>, say \`start\` to start the game, or \`end\` to abort it at any time.`);
         await this.channel.send("Everyone else, say `quit` any time before the game starts to leave.");
@@ -177,9 +193,9 @@ class Game {
         return prompt;
     }
 
-    /** Executes the game logic. Distributes prompts, and manages voting. */
+    /** Executes the game logic. Distributes prompts and manages voting. */
     async game() {
-        const prompts = this.client.packs.get(this.pack).prompts;
+        const prompts = this.pack.prompts;
         for(let i = 0; i < config.gameSequence.rounds.length; i++) {
             const round = config.gameSequence.rounds[i];
 
@@ -441,6 +457,8 @@ class Game {
             if(msg.content.toLowerCase() === "start" && !this.running) {
                 if(this.waiting.length < config.minPlayers) {
                     this.channel.send(`You need at least ${config.minPlayers} players to start!`).then((msg) => msg.delete({timeout: 3000}));
+                } else if(this.pack.prompts.length < this.waiting.length * 2 + 1) {
+                    this.channel.send(`For **${this.waiting.length}** players, you need a pack with at least **${this.waiting.length * 2 + 1}** prompts.  Either some players need to quit or a new game should be created with a different pack.`)                    
                 } else {
                     this.running = true;
                     this.players = [];

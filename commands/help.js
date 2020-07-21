@@ -51,7 +51,7 @@ module.exports = {
                 };
                 if(command.aliases) {
                     embed.fields.unshift({
-                            name: `Aliases${command.aliases.length > 1 ? "es" : ""}`,
+                            name: `Alias${command.aliases.length > 1 ? "es" : ""}`,
                             value: `\`${command.aliases.join("`, `")}\``
                     });
                 }
